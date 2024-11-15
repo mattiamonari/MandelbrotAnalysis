@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-def mandelbrot(x, y, t):
+def mandelbrot(x: float, y: float, t: int) -> int:
     '''
     This function is used to make colorful plots of the mandelbrot set returning
     the number of iterations it took to escape
