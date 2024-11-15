@@ -3,8 +3,11 @@ import matplotlib.pyplot as plt
 import scipy.stats.qmc as qmc
 import math
 
-from mandelbrot import is_point_in_mandelbrot
+from mandelbrot import is_point_in_mandelbrot, mandelbrot_area
 from mt19937 import MT19937, RandomSupport
+
+__all__ = ["random_sampling", "latin_hypercube_sampling", "orthogonal_sampling", 
+           "run_multple_simulations"]
 
 def random_sampling(samples, xy_range):
     u1 = np.random.uniform(0, 1, samples)
@@ -54,7 +57,7 @@ def orthogonal_sampling(samples, xy_range, depth=10, seed = 6969):
 
     points = np.array(points[:samples])
 
-    return points[:,0], points[:,1]
+    return (points[:,0], points[:,1])
 
 def run_multple_simulations(sampler, samples_range, iters_range, runs, xy_range, plot = False):
     # store computed areas, and confints

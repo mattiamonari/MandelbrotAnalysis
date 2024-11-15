@@ -36,14 +36,14 @@ def is_point_in_mandelbrot(x, y, t):
 def mandelbrot_area(samples, iters, sampled_points, filename, plot = False):
     points_evaluated = np.zeros((samples), dtype=complex)
     for s in range(samples):
-        hit = is_point_in_mandelbrot(sampled_points[s][0], sampled_points[s][1], iters)
-        points_evaluated[s] = complex(sampled_points[s][0], sampled_points[s][1]) if hit else 0
+        hit = is_point_in_mandelbrot(sampled_points[0][s], sampled_points[1][s], iters)
+        points_evaluated[s] = complex(sampled_points[0][s], sampled_points[1][s]) if hit else 0
 
     if(plot == True):
         plt.figure(figsize=(8, 8))
         plt.grid(True, alpha=0.3)
         plt.scatter(points_evaluated.real, points_evaluated.imag, color='red', s=0.1)
-        plt.savefig(f"../images/{filename}.pdf")
+        plt.savefig(f"./images/{filename}.pdf")
     
     return points_evaluated
 
