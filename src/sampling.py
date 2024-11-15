@@ -3,51 +3,29 @@ import matplotlib.pyplot as plt
 import scipy.stats.qmc as qmc
 import math
 
-from mandelbrot import mandelbrot_area
+from mandelbrot import is_point_in_mandelbrot
 from mt19937 import MT19937, RandomSupport
 
-def random_sampling(samples, iters, xy_range, plot = False):
+def random_sampling(samples, xy_range):
     u1 = np.random.uniform(0, 1, samples)
     u2 = np.random.uniform(0, 1, samples)
 
-    sols = np.zeros((samples), dtype=complex)
-    for s in range(samples):
-        x = xy_range[0] + (xy_range[1] - xy_range[0]) * u1[s]
-        y = xy_range[0] + (xy_range[1] - xy_range[0]) * u2[s]
-        iter = mandelbrot_area(x, y, iters)
-        sols[s] = complex(x, y) if iter else 0
+    x = xy_range[0] + (xy_range[1] - xy_range[0]) * u1
+    y = xy_range[0] + (xy_range[1] - xy_range[0]) * u2
 
-    if(plot == True):
-        plt.figure(figsize=(8, 8))
-        plt.grid(True, alpha=0.3)
-        plt.scatter(sols.real, sols.imag, color='red', s=0.1)
-        plt.savefig("../images/random_sampling.pdf")
-    
-    return sols
+    return x, y
 
-def latin_hypercube_sampling(samples, iters, xy_range, plot = False):
+def latin_hypercube_sampling(samples, xy_range):
     sampler = qmc.LatinHypercube(d=2)
     lhs_samples = sampler.random(n=samples)
 
     scaled_samples = qmc.scale(lhs_samples[:], xy_range[0], xy_range[1])
     real_samples, img_samples = scaled_samples[:, 0], scaled_samples[:, 1]
 
-    sols = np.zeros((samples), dtype=complex)
+    return real_samples, img_samples
 
-    for s in range(samples):
-        iter = mandelbrot_area(real_samples[s], img_samples[s], iters)
-        sols[s] = complex(real_samples[s], img_samples[s]) if iter else 0
-
-    if(plot == True):
-        plt.figure(figsize=(8, 8))
-        plt.grid(True, alpha=0.3)
-        plt.scatter(sols.real, sols.imag, color='red', s=0.1)
-        plt.savefig("../images/latin_hypercube_sampling.pdf")
-    
-    return sols
-
-def orthogonal_sampling(samples, iters, xy_range, depth=10, seed = 6969, plot = False):
-    size = math.ceil(((samples / 10) ** 0.5))
+def orthogonal_sampling(samples, xy_range, depth=10, seed = 6969):
+    size = math.ceil(((samples / depth) ** 0.5))
     rng = MT19937()
     rng.init_genrand(seed)
     rand_support = RandomSupport(rng)
@@ -56,8 +34,10 @@ def orthogonal_sampling(samples, iters, xy_range, depth=10, seed = 6969, plot = 
     x_grid = [[i + j * size for j in range(size)] for i in range(size)]
     y_grid = [[i + j * size for j in range(size)] for i in range(size)]
 
+    print(x_grid)
+
     points = []
-    scale = (xy_range[1] - xy_range[0]) / (samples/10)
+    scale = (xy_range[1] - xy_range[0]) / (samples/depth)
     
     for _ in range(depth):
         # Permute lists
@@ -72,33 +52,25 @@ def orthogonal_sampling(samples, iters, xy_range, depth=10, seed = 6969, plot = 
                 y = xy_range[0] + scale * (y_grid[j][i] + rng.genrand_real2())
                 points.append((x, y))
 
-    print(len(points[points != 0]))
-
     points = np.array(points[:samples])
-    sols = np.zeros((samples), dtype=complex)
-    print(samples)
-    print(size)
-    print(len(points))
-    for s in range(samples):
-        iter = mandelbrot_area(points[s][0], points[s][1], iters)
-        sols[s] = complex(points[s][0], points[s][1]) if iter else 0
 
-    if(plot == True):
-        plt.figure(figsize=(8, 8))
-        plt.grid(True, alpha=0.3)
-        plt.scatter(sols.real, sols.imag, color='red', s=0.1)
-        plt.savefig("../images/orthogonal_sampling.pdf")
-    
-    return sols
+    return points[:,0], points[:,1]
 
 def run_multple_simulations(sampler, samples_range, iters_range, runs, xy_range, plot = False):
-    for samples in samples_range:
-        for iters in iters_range:
-            res = np.empty(runs, dtype=float)
-            for _ in range(runs):
-                sols = sampler(samples, iters, xy_range)
-                res = np.append(res, len(sols[sols != 0]) / samples * (xy_range[1] - xy_range[0])**2)
-            
+    # store computed areas, and confints
+    # increasing iters on rows, increasing samples on cols
+    areas = np.empty((len(iters_range), len(samples_range)))
+    conf_int = np.empty((len(iters_range), len(samples_range)))
+
+
+    for j, samples in enumerate(samples_range):
+        for i, iters in enumerate(iters_range):
+            res = np.zeros(runs, dtype=float)
+            for l in range(runs):
+                points_samples = sampler(samples, xy_range)
+                points_evaluated = mandelbrot_area(samples, iters, points_samples, False)
+                res[l] = len(points_evaluated[points_evaluated != 0]) / samples * (xy_range[1] - xy_range[0])**2
+
             X = sum(res) / runs
             res -= X
             S2 = (sum(res ** 2) / (runs - 1))
@@ -108,3 +80,44 @@ def run_multple_simulations(sampler, samples_range, iters_range, runs, xy_range,
             print(f'Iterations: {iters}')
             print(f'Est. Mean Area: {X} +/- {conf_inter}')
             print(f'Est. Variance: {S2}')
+            conf_int[i, j] = conf_inter
+            areas[i, j] = X 
+    
+
+    colors = ['gold', 'limegreen', 'steelblue']
+    for i, iter in enumerate(iters_range):
+        print(f'Areas: {areas[i]}')
+        # Plot the main line with fewer markers
+        plt.semilogx(samples_range, areas[i], 
+                    label=f'Iterations: {iter}', 
+                    color=colors[i], 
+                    marker='o',
+                    markersize=4)         # Plot markers every nth point
+    
+        # Add confidence interval as a shaded region
+        plt.fill_between(samples_range,
+                        areas[i] - conf_int[i],
+                        areas[i] + conf_int[i],
+                        alpha=0.2,
+                        color=colors[i])
+
+    # Add a horizontal line for the true value
+    true_area = 1.506484531122182
+    plt.axhline(y=true_area, color='black', linestyle='--', label='True Area')
+
+    # # Add text label for true area
+    plt.text(samples_range[0] - 20,
+        true_area,
+        f'{true_area:.3f}',
+        verticalalignment='bottom',
+        color='black')
+
+    plt.xlabel('Number of Samples')
+    plt.ylabel('Estimated Area')
+    plt.title('Mandelbrot Set Area Estimation with 95% Confidence Intervals')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+
+    plt.savefig(f'../images/{sampler.__name__}.pdf')
+    plt.close()

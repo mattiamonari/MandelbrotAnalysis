@@ -18,7 +18,7 @@ def mandelbrot(x, y, t):
 
     return t
 
-def mandelbrot_area(x, y, t):
+def is_point_in_mandelbrot(x, y, t):
     '''
     This function is used to make evaluate if a point is in the mandelbrot set
     '''
@@ -33,12 +33,27 @@ def mandelbrot_area(x, y, t):
 
     return 1
 
+def mandelbrot_area(samples, iters, sampled_points, filename, plot = False):
+    points_evaluated = np.zeros((samples), dtype=complex)
+    for s in range(samples):
+        hit = is_point_in_mandelbrot(sampled_points[s][0], sampled_points[s][1], iters)
+        points_evaluated[s] = complex(sampled_points[s][0], sampled_points[s][1]) if hit else 0
+
+    if(plot == True):
+        plt.figure(figsize=(8, 8))
+        plt.grid(True, alpha=0.3)
+        plt.scatter(points_evaluated.real, points_evaluated.imag, color='red', s=0.1)
+        plt.savefig(f"../images/{filename}.pdf")
+    
+    return points_evaluated
+
+
 def plot_mandelbrot(samples, iters, x_range, y_range):
     cmaps = ["cubehelix", "rocket", "mako", "magma"]
     _, ax = plt.subplots(2, 2, figsize=(10, 10))
 
     for col in range(len(cmaps)):
-        x = np.linspace(x_range[0], x_range[1], samples)
+        x = np.linspace(x_range[0], x_range[1], samples)    
         y = np.linspace(y_range[0], y_range[1], samples)
         z = np.zeros((samples, samples))
 
