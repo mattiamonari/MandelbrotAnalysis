@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import time
 
 def mandelbrot(x: float, y: float, t: int) -> int:
     '''
@@ -33,7 +34,15 @@ def is_point_in_mandelbrot(x, y, t):
 
     return 1
 
-def mandelbrot_area(samples, iters, sampled_points, filename, plot = False):
+def mandelbrot_area(iters, sample_func, params, filename, plot = False, verbose = False):
+
+    samples = params[0]
+    # Evaluate sample function
+    sampled_points = sample_func(*params)
+
+    verbose and print(f"Starting sampling with {sample_func.__name__} function...")
+    start_time = time.time()
+
     points_evaluated = np.zeros((samples), dtype=complex)
     for s in range(samples):
         hit = is_point_in_mandelbrot(sampled_points[0][s], sampled_points[1][s], iters)
@@ -43,7 +52,9 @@ def mandelbrot_area(samples, iters, sampled_points, filename, plot = False):
         plt.figure(figsize=(8, 8))
         plt.grid(True, alpha=0.3)
         plt.scatter(points_evaluated.real, points_evaluated.imag, color='red', s=0.1)
-        plt.savefig(f"./images/{filename}.pdf")
+        # plt.savefig(f"./images/{filename}.pdf")
+
+    verbose and print(f"Sampling with {sample_func.__name__} took {time.time() - start_time} seconds")
     
     return points_evaluated
 
