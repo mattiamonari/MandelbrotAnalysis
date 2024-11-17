@@ -1,13 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from typing import Tuple
+from collections.abc import Callable
+
 from mandelbrot import mandelbrot_area
 
 class Utilities():
-    def run_multple_simulations(sampler, samples_range, iters_range, runs, xy_range, 
-                                plot = False):
+    def run_multple_simulations(sampler: Callable, samples_range: Tuple, 
+                                iters_range: list, runs: int, xy_range: Tuple, 
+                                plot: bool = False) -> Tuple[np.ndarray, np.ndarray]:
         # store computed areas, and confints
-        # increasing iters on rows, increasing samples on cols
+        # increasing iters along rows, increasing samples along cols
         areas = np.empty((len(iters_range), len(samples_range)))
         conf_int = np.empty((len(iters_range), len(samples_range)))
 
@@ -71,5 +75,5 @@ def plot_multiple_simulations(iters_range, samples_range, areas, conf_int,
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    plt.savefig(f'../images/{samp_func_name}.pdf')
+    plt.savefig(f'./images/{samp_func_name}.pdf')
     plt.close()

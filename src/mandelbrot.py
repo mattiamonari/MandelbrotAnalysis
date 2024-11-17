@@ -52,7 +52,7 @@ def mandelbrot_area(iters, sample_func, params, filename, plot = False, verbose 
         plt.figure(figsize=(8, 8))
         plt.grid(True, alpha=0.3)
         plt.scatter(points_evaluated.real, points_evaluated.imag, color='red', s=0.1)
-        # plt.savefig(f"./images/{filename}.pdf")
+        plt.savefig(f"./images/{filename}.pdf")
 
     verbose and print(f"Sampling with {sample_func.__name__} took {time.time() - start_time} seconds")
     

@@ -1,12 +1,14 @@
 import time
 import numpy as np
 
+from typing import Tuple
 
 from sampling import *
 from mandelbrot import mandelbrot_area
 from utilities import Utilities
 
-def main(n_samples, sampling_range, n_samples_range, iters_range, runs, xy_range):
+def main(n_samples: int, sampling_range: Tuple, n_samples_range: list, 
+         iters_range: list, runs: int, xy_range: Tuple) -> int:
     
     # First analysis
     params = (n_samples, sampling_range)
