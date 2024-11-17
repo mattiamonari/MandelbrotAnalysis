@@ -75,5 +75,5 @@ def plot_multiple_simulations(iters_range, samples_range, areas, conf_int,
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
 
-    plt.savefig(f'./images/{samp_func_name}.pdf')
+    plt.savefig(f'~/images/{samp_func_name}.pdf')
     plt.close()
