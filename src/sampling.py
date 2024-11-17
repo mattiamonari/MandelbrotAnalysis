@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import scipy.stats.qmc as qmc
 import math
 
-from mandelbrot import is_point_in_mandelbrot, mandelbrot_area
 from mt19937 import MT19937, RandomSupport
 
 __all__ = ["random_sampling", "latin_hypercube_sampling", "orthogonal_sampling"]
