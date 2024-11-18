@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import time
+import tqdm
 
 def mandelbrot(x: float, y: float, t: int) -> int:
     '''
@@ -59,20 +60,20 @@ def mandelbrot_area(iters, sample_func, params, filename, plot = False, verbose 
     return points_evaluated
 
 
-def plot_mandelbrot(samples, iters, x_range, y_range):
-    cmaps = ["cubehelix", "rocket", "mako", "magma"]
+def plot_mandelbrot(samples, iter_range, x_ranges, y_ranges):
+    cmaps = ["cubehelix", "rocket_r", "magma", "YlOrBr"]
     _, ax = plt.subplots(2, 2, figsize=(10, 10))
 
     for col in range(len(cmaps)):
-        x = np.linspace(x_range[0], x_range[1], samples)    
-        y = np.linspace(y_range[0], y_range[1], samples)
+        x = np.linspace(x_ranges[col][0], x_ranges[col][1], samples)    
+        y = np.linspace(y_ranges[col][0], y_ranges[col][1], samples)
         z = np.zeros((samples, samples), dtype=int)
 
         for i in range(samples):
             for j in range(samples):
-                z[i, j] = mandelbrot(x[i], y[j], iters)
+                z[i, j] = mandelbrot(x[i], y[j], iter_range[col])
 
         a1, a2 = col % 2, col // 2
-        sns.heatmap(z, cmap=cmaps[col], ax=ax[a1, a2], xticklabels=False, yticklabels=False, cbar=False)
+        sns.heatmap(z.T, cmap=cmaps[col], ax=ax[a1, a2], xticklabels=False, yticklabels=False, cbar=False)
         
-    plt.savefig("../images/mandelbrot.pdf")
+    plt.savefig("../images/mandelbrot.png", dpi=600)
