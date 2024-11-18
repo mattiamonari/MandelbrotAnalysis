@@ -52,7 +52,7 @@ def mandelbrot_area(iters, sample_func, params, filename, plot = False, verbose 
         plt.figure(figsize=(8, 8))
         plt.grid(True, alpha=0.3)
         plt.scatter(points_evaluated.real, points_evaluated.imag, color='red', s=0.1)
-        plt.savefig(f"./images/{filename}.pdf")
+        plt.savefig(f"../images/{filename}.pdf")
 
     verbose and print(f"Sampling with {sample_func.__name__} took {time.time() - start_time} seconds")
     
@@ -66,14 +66,13 @@ def plot_mandelbrot(samples, iters, x_range, y_range):
     for col in range(len(cmaps)):
         x = np.linspace(x_range[0], x_range[1], samples)    
         y = np.linspace(y_range[0], y_range[1], samples)
-        z = np.zeros((samples, samples))
+        z = np.zeros((samples, samples), dtype=int)
 
         for i in range(samples):
             for j in range(samples):
                 z[i, j] = mandelbrot(x[i], y[j], iters)
 
         a1, a2 = col % 2, col // 2
+        sns.heatmap(z, cmap=cmaps[col], ax=ax[a1, a2], xticklabels=False, yticklabels=False, cbar=False)
         
-    plt.figure(figsize=(8, 8))
-    sns.heatmap(z, cmap=cmaps[col], ax=ax[a1, a2], xticklabels=False, yticklabels=False, cbar=False)
     plt.savefig("../images/mandelbrot.pdf")
