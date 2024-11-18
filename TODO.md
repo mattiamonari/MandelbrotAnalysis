@@ -24,3 +24,8 @@ Define convergence study
 ### 4)
 
 Code refactor
+
+
+### 5)
+
+Mandelbrot color plots -> choose different zones of the set for the four subplots
